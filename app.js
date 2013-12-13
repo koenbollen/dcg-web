@@ -6,13 +6,14 @@ var path = require('path');
 var redis = require('redis');
 var fs = require('fs');
 
+var config = require('./config');
+
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || config.port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-app.use(express.favicon());
 app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
@@ -43,12 +44,12 @@ pubsub.on('message', function(channel, message) {
   if(message == 'dcg:whitelist') {
     db.smembers('dcg:whitelist', function(err, members) {
       if(err) throw err;
-      fs.writeFile( 'whitelist.txt', members.join('\n')+'\n', {
+      fs.writeFile( config.whitelist, members.join('\n')+'\n', {
         encoding: 'utf8',
         mode: 0640,
       }, function(err) {
         if(err) throw err;
-        console.log('whitelist.txt updated!');
+        //console.log(config.whitelist+' updated!');
       });
     });
   }

@@ -5,4 +5,4 @@ block content
   p sup #{mail}, alles web?
 
   #register
-    form!= form.toHTML()
+    form(method="post")!= form.toHTML()

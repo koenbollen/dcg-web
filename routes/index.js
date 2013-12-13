@@ -1,22 +1,28 @@
 
 var nodemailer = require('nodemailer');
-var redis = require("redis");
+var redis = require('redis');
+var jade = require('jade');
 var crypto = require('crypto');
+
+var config = require('../config');
+
+
+var server = nodemailer.createTransport();
+var client = redis.createClient();
+
 
 var forms = require('forms'),
     fields = forms.fields,
     validators = forms.validators;
 
-var server = nodemailer.createTransport();
-
-var client = redis.createClient();
-
 var subscribeForm = forms.create({
   mail: fields.email({required: true, label: 'Email Address'}),
 });
+
 var registerForm = forms.create({
   user: fields.string({required: true, label: 'Minecraft Username'}),
 });
+
 exports.index = function(req, res){
 
   subscribeForm.handle(req, {
@@ -35,20 +41,22 @@ exports.index = function(req, res){
             if(err) throw err;
             var token = buf.toString('hex');
 
-            client.setex('dcg:token:'+token, 3600, mail, function(err, result) {
+            client.setex('dcg:token:'+token, config.token_expiration, mail, function(err, result) {
               if(err) throw err;
 
-              var url = 'http://localhost:3000/register/'+token;
+              var url = config.base+'/register/'+token;
+
+              console.log(jade.renderFile('views/mail/confirm-text.jade', {url: url, mail: mail}));
 
               server.sendMail({
                 from: "DCG System <system@dcg>",
                 to: mail,
-                subject: "DCG Subscription ✔",
-                text: "Please open your browser to the following location: " + url,
-                html: "Click the following link to register your minecraft username: <a href=\""+url+"\">"+url+"</a>"
+                subject: "DCG: Minecraft Registration ✔",
+                text: jade.renderFile('views/mail/confirm-text.jade', {url: url, mail: mail}),
+                html: jade.renderFile('views/mail/confirm-html.jade', {url: url, mail: mail}),
               }, function(err, result) {
                 if(err)throw err;
-                res.render('checkmail');
+                res.render('mailed');
               });
             });
           });
@@ -57,7 +65,9 @@ exports.index = function(req, res){
       });
     },
     other: function(form) {
-      res.render('index', {form:form});
+      client.smembers('dcg:whitelist', function(err, members) {
+        res.render('index', {form:form, members:members});
+      });
     }
   });
 };
@@ -73,14 +83,20 @@ exports.register = function(req, res) {
         success: function(form) {
           var user = form.data.user;
           //console.log( mail, 'plays with', user );
-          client.multi()
-            .del(key)
-            .sadd('dcg:whitelist', user)
-            .hset('dcg:mail', user, mail)
-            .publish('dcg:update', 'dcg:whitelist')
-            .exec(function(err, results) {
-              if(err) throw err;
-              res.render('thanks', {mail:mail, user:user});
+          client.hget('dcg:bymail', mail, function(err, previous) {
+
+            client.multi()
+              .del(key)
+              .srem('dcg:whitelist', previous)
+              .sadd('dcg:whitelist', user)
+              .hdel('dcg:byuser', user)
+              .hset('dcg:byuser', user, mail)
+              .hset('dcg:bymail', mail, user)
+              .publish('dcg:update', 'dcg:whitelist')
+              .exec(function(err, results) {
+                if(err) throw err;
+                res.render('thanks', {mail:mail, user:user, previous: previous});
+              });
             });
         },
         other: function(form) {
