@@ -3,6 +3,8 @@ var express = require('express');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
+var redis = require('redis');
+var fs = require('fs');
 
 var app = express();
 
@@ -23,8 +25,33 @@ if ('development' == app.get('env')) {
   app.use(express.errorHandler());
 }
 
-app.get('/', routes.index);
+app.all('/', routes.index);
+app.all('/register/:token', routes.register);
 
 http.createServer(app).listen(app.get('port'), function(){
   console.log('dcg-web server listening on port ' + app.get('port'));
 });
+
+
+// Update listener:
+pubsub = redis.createClient()
+db = redis.createClient()
+
+pubsub.subscribe('dcg:update');
+pubsub.on('message', function(channel, message) {
+  console.log(channel, message);
+  if(message == 'dcg:whitelist') {
+    db.smembers('dcg:whitelist', function(err, members) {
+      if(err) throw err;
+      fs.writeFile( 'whitelist.txt', members.join('\n')+'\n', {
+        encoding: 'utf8',
+        mode: 0640,
+      }, function(err) {
+        if(err) throw err;
+        console.log('whitelist.txt updated!');
+      });
+    });
+  }
+});
+
+
