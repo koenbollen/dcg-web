@@ -18,13 +18,20 @@ app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
-app.use(app.router);
 
 // development only
 if ('development' == app.get('env')) {
-  app.use(express.static(path.join(__dirname, 'public')));
+  app.use('/static', express.static(path.join(__dirname, 'public')));
   app.use(express.errorHandler());
 }
+
+app.use(function(req, res, next) {
+  res.locals.title = "Dutch Craft Garden";
+  res.locals.subtitle = "Community Minecraft";
+  next();
+});
+
+app.use(app.router);
 
 app.all('/', routes.index);
 app.all('/register/:token', routes.register);

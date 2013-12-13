@@ -15,12 +15,19 @@ var forms = require('forms'),
     fields = forms.fields,
     validators = forms.validators;
 
+var bootstrap_field = function (name, object) {
+    var label = object.labelHTML(name);
+    var error = object.error ? '<p class="form-error-tooltip">' + object.error + '</p>' : '';
+    var widget = '<div class="controls col col-lg-9">' + object.widget.toHTML(name, object) + error + '</div>';
+    return '<div class="form-group ' + (error !== '' ? 'has-error' : '')  + '">' + label + widget + '</div>';
+};
+
 var subscribeForm = forms.create({
-  mail: fields.email({required: true, label: 'Email Address'}),
+  mail: fields.email({required: true, label: 'Email Address:'}),
 });
 
 var registerForm = forms.create({
-  user: fields.string({required: true, label: 'Minecraft Username'}),
+  user: fields.string({required: true, label: 'Minecraft Username:'}),
 });
 
 exports.index = function(req, res){
@@ -66,7 +73,7 @@ exports.index = function(req, res){
     },
     other: function(form) {
       client.smembers('dcg:whitelist', function(err, members) {
-        res.render('index', {form:form, members:members});
+        res.render('index', {form:form.toHTML(function (name, object) { return bootstrap_field(name, object); }), members:members});
       });
     }
   });
