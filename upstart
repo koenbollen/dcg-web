@@ -1,10 +1,15 @@
 
 description "dcg-web"
 
+start on filesystem and net-device-up IFACE!=lo
+
 setuid koen
 setgid koen
 
-#respawn
+respawn
 
+env NODE_PORT=3000
+env PORT=3000
+env NODE_ENV=production
 chdir /opt/dcg-web
 exec node app.js
