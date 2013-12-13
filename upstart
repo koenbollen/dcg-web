@@ -1,0 +1,10 @@
+
+description "dcg-web"
+
+setuid koen
+setgid koen
+
+#respawn
+
+chdir /opt/dcg-web
+exec node app.js
