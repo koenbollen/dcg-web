@@ -18,7 +18,7 @@ var forms = require('forms'),
 var bootstrap_field = function (name, object) {
     var label = object.labelHTML(name);
     var error = object.error ? '<p class="form-error-tooltip">' + object.error + '</p>' : '';
-    var widget = '<div class="controls col col-lg-9">' + object.widget.toHTML(name, object) + error + '</div>';
+    var widget = object.widget.toHTML(name, object).replace('input', 'input class="form-control"') + error;
     return '<div class="form-group ' + (error !== '' ? 'has-error' : '')  + '">' + label + widget + '</div>';
 };
 
@@ -27,7 +27,7 @@ var subscribeForm = forms.create({
 });
 
 var registerForm = forms.create({
-  user: fields.string({required: true, label: 'Minecraft Username:'}),
+  user: fields.string({required: true, label: ' '}),
 });
 
 exports.index = function(req, res){
@@ -52,8 +52,6 @@ exports.index = function(req, res){
               if(err) throw err;
 
               var url = config.base+'/register/'+token;
-
-              console.log(jade.renderFile('views/mail/confirm-text.jade', {url: url, mail: mail}));
 
               server.sendMail({
                 from: "DCG System <system@dcg>",
@@ -107,7 +105,7 @@ exports.register = function(req, res) {
             });
         },
         other: function(form) {
-          res.render('register', {mail:mail, form:form});
+          res.render('register', {mail:mail, form:form.toHTML(function (name, object) { return bootstrap_field(name, object); })});
         }
       });
     }

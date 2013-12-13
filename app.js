@@ -28,6 +28,7 @@ if ('development' == app.get('env')) {
 app.use(function(req, res, next) {
   res.locals.title = "Dutch Craft Garden";
   res.locals.subtitle = "Community Minecraft";
+  res.locals.base = config.base;
   next();
 });
 

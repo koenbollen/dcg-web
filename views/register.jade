@@ -1,8 +1,12 @@
 extends layout
 
 block content
-  h1 Register Minecraft Account
-  p sup #{mail}, alles web?
+  .row
+    .col-xs-6
+      .well
+        h1 Hi #{mail}!
+        h3 Please enter your Minecraft username:
 
-  #register
-    form(method="post")!= form.toHTML()
+        #register
+          form(method="post")!= form
+            button.btn.btn-primary(type="submit") Join the fun!
