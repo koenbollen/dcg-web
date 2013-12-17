@@ -3,8 +3,8 @@ description "dcg-web"
 
 start on filesystem and net-device-up IFACE!=lo
 
-setuid koen
-setgid koen
+setuid minecraft
+setgid minecraft
 
 respawn
 

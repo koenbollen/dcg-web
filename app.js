@@ -5,6 +5,7 @@ var http = require('http');
 var path = require('path');
 var redis = require('redis');
 var fs = require('fs');
+var exec = require('child_process').exec;
 
 var config = require('./config');
 
@@ -35,10 +36,12 @@ if ('development' == app.get('env')) {
 app.log = function( req, msg, err ) {
   var info = {
     date: new Date(),
-    ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
     message: msg,
   };
-  if(err !== undefined) {
+  if(req !== undefined && req !== null) {
+    info.ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  }
+  if(err !== undefined && err !== null) {
     info.err = err;
   }
   if( 'development' == app.get('env') ) {
@@ -79,7 +82,9 @@ pubsub.on('message', function(channel, message) {
         encoding: 'utf8',
         mode: 0640,
       }, function(err) {
-        if(err) throw err;
+        exec('/usr/local/bin/msm dcg cmd whitelist reload', function(err2, stdout, stderr) {
+          app.log(undefined, 'whitelist updated: ' + members.length, err);
+        });
         //console.log(config.whitelist+' updated!');
       });
     });
