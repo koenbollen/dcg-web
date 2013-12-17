@@ -9,7 +9,7 @@ block content
         <a href="http://dutchgamegarden.nl/">Dutch Game Garden</a>. If you
         want to join our crafting madness, fill in the form to your right.
 
-      h3.well
+      h3.well#mchost-well
         |Minecraft IP Address:&nbsp;
         span#mchost.text-info= config.mchost
     .col-xs-4.col-md-offset-1
@@ -35,12 +35,12 @@ block content
 
 block script
   script.
-    $('#mchost').click(function (){
-      var text = $(this).text();
-      var $this = $(this);
+    $('#mchost-well').click(function (){
+      var $this = $('#mchost');
+      var text = $this.text();
       var $input = $('<input id=mchost type=text readonly>');
       $input.prop('value', text);
-      $input.insertAfter($(this));
+      $input.insertAfter($this);
       $input.focus();
       $input.select();
       $this.hide();
