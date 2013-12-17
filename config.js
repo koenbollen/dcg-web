@@ -3,8 +3,10 @@ module.exports = {
   base: 'http://localhost:3000',
   secret: 'please override in localconfig.js',
 
+  mchost: 'localhost',
+
   whitelist: './whitelist.txt',
-  
+
   token_expiration: 3600,//an hour
 
   email_from: 'DCG System <system@dcg>',
