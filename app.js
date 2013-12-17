@@ -35,7 +35,7 @@ if ('development' == app.get('env')) {
 app.log = function( req, msg, err ) {
   var info = {
     date: new Date(),
-    ip: req.connection.remoteAddress,
+    ip: req.headers['x-forwarded-for'] || req.connection.remoteAddress,
     message: msg,
   };
   if(err !== undefined) {
