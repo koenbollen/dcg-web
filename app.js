@@ -8,13 +8,19 @@ var fs = require('fs');
 
 var config = require('./config');
 
+// Redis conncetions:
+pubsub = redis.createClient()
+db = redis.createClient()
+
 var app = express();
 
 // all environments
+if(config.trustproxy) {
+  app.enable('trust proxy');
+}
 app.set('port', process.env.PORT || config.port);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
-app.use(express.logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(express.methodOverride());
@@ -23,9 +29,27 @@ app.use(express.methodOverride());
 if ('development' == app.get('env')) {
   app.use('/static', express.static(path.join(__dirname, 'public')));
   app.use(express.errorHandler());
+  app.use(express.logger('dev'));
+}
+
+app.log = function( req, msg, err ) {
+  var info = {
+    date: new Date(),
+    ip: req.connection.remoteAddress,
+    message: msg,
+  };
+  if(err !== undefined) {
+    info.err = err;
+  }
+  if( 'development' == app.get('env') ) {
+    console.log('log event:', info);
+  }
+  db.lpush('dcg:events', JSON.stringify( info ));
 }
 
 app.use(function(req, res, next) {
+  req.app = app;
+  req.log = app.log.bind(app, req);
   res.locals.title = "Dutch Craft Garden";
   res.locals.subtitle = "Community Minecraft";
   res.locals.base = config.base;
@@ -44,8 +68,6 @@ http.createServer(app).listen(app.get('port'), function(){
 
 
 // Update listener:
-pubsub = redis.createClient()
-db = redis.createClient()
 
 pubsub.subscribe('dcg:update');
 pubsub.on('message', function(channel, message) {

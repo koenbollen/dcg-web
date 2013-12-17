@@ -1,7 +1,8 @@
 module.exports = {
   port: 3000,
   base: 'http://localhost:3000',
-  secret: 'please override in localconfig.js',
+  secret: 'please override in localconfig.js', 
+  trustproxy: false,
 
   mchost: 'localhost',
 

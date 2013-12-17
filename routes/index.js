@@ -41,8 +41,10 @@ exports.index = function(req, res){
 
       client.sismember('dcg:domains', domain, function(err, result) { 
         if(err || !result) {
+          req.log( 'request for token: ' + mail + ' INVALID', err );
           res.render('error', {code: 'no-dgg-mail', message: 'your e-mail address doesn\'t belong to a company in the DutchGameGarden'});
         } else {
+          req.log( 'request for token: ' + mail + ' ok' );
 
           crypto.randomBytes(16, function(err, buf) {
             if(err) throw err;
@@ -60,7 +62,8 @@ exports.index = function(req, res){
                 text: jade.renderFile('views/mail/confirm-text.jade', {url: url, mail: mail}),
                 html: jade.renderFile('views/mail/confirm-html.jade', {url: url, mail: mail}),
               }, function(err, result) {
-                if(err)throw err;
+                if(err) throw err;
+                req.log( 'token sent to ' + mail);
                 res.render('mailed');
               });
             });
@@ -82,6 +85,7 @@ exports.register = function(req, res) {
   client.get(key, function(err, mail) {
     if(err) throw err;
     if( !mail ) {
+      req.log( 'invalid token used: ' + req.params.token);
       res.render('error', {code: 'invalid-token', message: 'invalid token'});
     } else {
       registerForm.handle(req, {
@@ -100,6 +104,7 @@ exports.register = function(req, res) {
               .publish('dcg:update', 'dcg:whitelist')
               .exec(function(err, results) {
                 if(err) throw err;
+                req.log( 'user whitelisted: ' + user + ' (mail was ' + mail + ' and previous user was: ' + previous);
                 res.render('thanks', {mail:mail, user:user, previous: previous});
               });
             });
