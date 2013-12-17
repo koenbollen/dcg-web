@@ -1,0 +1,16 @@
+span#mchost {
+
+}
+input#mchost {
+	border: none;
+	display: inline;
+	font-size: 24px;
+	font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+	font-weight: 500;
+	line-height: 1.1;
+	color: #31708f;
+	height: auto;
+	background: transparent;
+	-webkit-appearance: none;
+	padding: 0;
+}
