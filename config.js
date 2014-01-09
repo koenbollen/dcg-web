@@ -1,7 +1,7 @@
 module.exports = {
   port: 3000,
   base: 'http://localhost:3000',
-  secret: 'please override in localconfig.js', 
+  secret: 'please override in localconfig.js',
   trustproxy: false,
 
   mchost: 'localhost',
@@ -12,6 +12,8 @@ module.exports = {
 
   email_from: 'DCG System <system@dcg>',
   email_subject: 'DCG: Minecraft Registration ✔',
+
+  logpath: './minecraft.log',
 };
 
 var localconfig = undefined;

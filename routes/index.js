@@ -39,7 +39,7 @@ exports.index = function(req, res){
       var domain = mail.substr(mail.indexOf("@")+1);
       //console.log('domain', domain);
 
-      client.sismember('dcg:domains', domain, function(err, result) { 
+      client.sismember('dcg:domains', domain, function(err, result) {
         if(err || !result) {
           req.log( 'request for token: ' + mail + ' INVALID', err );
           res.render('error', {code: 'no-dgg-mail', message: 'your e-mail address doesn\'t belong to a company in the DutchGameGarden'});
@@ -56,7 +56,7 @@ exports.index = function(req, res){
               var url = config.base+'/register/'+token;
 
               server.sendMail({
-                from: "DCG System <system@dcg>",
+                from: "DCG System <system@dcg.koen.it>",
                 to: mail,
                 subject: "DCG: Minecraft Registration ✔",
                 text: jade.renderFile('views/mail/confirm-text.jade', {url: url, mail: mail}),
@@ -73,9 +73,18 @@ exports.index = function(req, res){
       });
     },
     other: function(form) {
-      client.smembers('dcg:whitelist', function(err, members) {
-        res.render('index', {form:form.toHTML(function (name, object) { return bootstrap_field(name, object); }), members:members});
-      });
+      client.multi()
+        .smembers('dcg:whitelist')
+        .lrange('dcg:online', 0, -1)
+        .lrange('dcg:latest', 0, -1)
+        .exec(function(err, results) {
+          res.render('index', {
+            form:form.toHTML(function (name, object) { return bootstrap_field(name, object); }),
+            members: results[0],
+            online: results[1],
+            latest: results[2]
+          });
+        });
     }
   });
 };

@@ -14,3 +14,17 @@ input#mchost {
 	-webkit-appearance: none;
 	padding: 0;
 }
+
+.slot {
+  float: left;
+  width: 75px;
+  text-align: center;
+  font-size: 14pt;
+  font-weight: bold;
+
+  text-shadow: 0px 0px 2px #440000;
+}
+
+.slot.online {
+  text-shadow: 0px 0px 5px #00ff00;
+}

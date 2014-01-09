@@ -30,10 +30,19 @@ block content
         .panel-heading
           h3.panel-title Last seen online
         .panel-body
-          p.text-muted.
-            This feature is still under development...
+          each player in online
+            .slot.online
+              img.skin(src="http://s3.amazonaws.com/MinecraftSkins/#{player}.png")
+              .name= player
+          each player in latest
+            .slot
+              img.skin(src="http://s3.amazonaws.com/MinecraftSkins/#{player}.png")
+              .name= player
 
 block script
+  script(src="static/javascripts/mcSkinRenderer.js")
+  script.
+    renderMCSkins('skin', 4);
   script.
     $('#mchost-well').click(function (){
       var $this = $('#mchost');
